@@ -11,11 +11,31 @@
   const socket = io();
 </script>
 <script defer>
-  socket.on('data', (msg) => {
-    const item = document.createElement('li');
-    item.textContent = msg;
-    messages.appendChild(item);
-    window.scrollTo(0, document.body.scrollHeight);
+  socket.on('data', (data) => {
+    datasplit = data.split(" ");
+    if (datasplit[2].toUpperCase () !== datasplit[2].toLowerCase()) //isalphabetic??
+    {
+      datasplit[2] = datasplit[2].toLowerCase().charCodeAt(0) - 96;
+    }
+    if (datasplit[1].toUpperCase () !== datasplit[1].toLowerCase()) //isalphabetic??
+    {
+      //letter coordinate to second place (it means columns)
+      var temp = datasplit[1].toLowerCase().charCodeAt(0) - 96;
+      datasplit[1] = datasplit[2]
+      datasplit[2] = temp
+    }
+    if (datasplit.length == 4 && !isNaN(+datasplit[1]) && !isNaN(+datasplit[2])) {
+      console.log("user:" + datasplit[0] + " row:" + datasplit[1] + " column:" + datasplit[2] + " color:" + datasplit[3])
+      if (datasplit[1] > 16 || datasplit[1] <= 0 || datasplit[2] > 16 || datasplit[2] <= 0) {
+        console.log("coordinates out of scope")
+      }
+      else {
+        document.getElementsByTagName("tr")[+datasplit[1]].getElementsByTagName("td")[+datasplit[2]].style.backgroundColor = datasplit[3]
+      }
+    }
+    else {
+      console.error("SocketData error: \"" + data + "\"\nis has:" + datasplit.length + " separate elements, 4 expected\n" + "\"element [1] isNaN value:" + isNaN(+datasplit[1]) + " separate elements, false expected\n" + "\"element [2] isNaN value:" + isNaN(+datasplit[2]) + " separate elements, false expected\n")
+    }
   });
 </script> <!--  defer -->
 
@@ -24,11 +44,13 @@
     font-size: 1.5rem;
     font-family: Arial, Helvetica, sans-serif;
   }
+
   table {
     border-collapse: collapse;
     /* aspect-ratio: 1; */
     height: 90vh;
   }
+
   td {
     height: calc(90vh /17);
     width: calc(90vh / 17);
