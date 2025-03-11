@@ -1,4 +1,16 @@
 const { SerialPort } = require("serialport");
+var createInterface = require("readline").createInterface;
+
+const port = new SerialPort({
+  path: "COM13", //TODO: port
+  baudRate: 115200,
+  autoOpen: false,
+});
+
+var lineReader = createInterface({
+  input: port,
+});
+
 const express = require("express");
 const { createServer } = require("node:http");
 const { join } = require("node:path");
@@ -18,12 +30,6 @@ io.on("connection", (socket) => {
 
 server.listen(3000, () => {
   console.log("server running at http://localhost:3000");
-});
-
-const port = new SerialPort({
-  path: "COM5", //TODO: port
-  baudRate: 115200,
-  autoOpen: false,
 });
 
 port.open(function (err) {
@@ -49,26 +55,29 @@ port.on("open", function () {
 var dict = new Object();
 
 // Switches the port into "flowing mode"
-port.on("data", function (data) {
+lineReader.on("line", function (data) {
   //TODO: separate lines
+  data = data.trim();
 
-  console.log("Data:", data);
-  //check serial number
-  currentSerNum = data.split(" ")[0];
-  if (currentSerNum != "ADMIN") {
-    millis = Date.now();
-    if (
-      !dict.hasOwnProperty(currentSerNum) ||
-      dict[currentSerNum].time <= millis - 500
-    ) {
-      //save sernum last time
-      dict[currentSerNum] = millis;
+  console.log('Data:"' + data + '"');
+  io.emit("data", data);
 
-      //send data to socket.io
-      // this will emit the event to all connected sockets
-      io.emit("data", data);
-    }
-  }
+  // //check serial number
+  // currentSerNum = data.split(" ")[0];
+  // if (currentSerNum != "ADMIN") {
+  //   millis = Date.now();
+  //   if (
+  //     !dict.hasOwnProperty(currentSerNum) ||
+  //     dict[currentSerNum].time <= millis - 500
+  //   ) {
+  //     //save sernum last time
+  //     dict[currentSerNum] = millis;
+
+  //     //send data to socket.io
+  //     // this will emit the event to all connected sockets
+  //     io.emit("data", data);
+  //   }
+  // }
 });
 
 io.on("status", () => {
@@ -93,9 +102,12 @@ process.stdin.on("keypress", (key, data) => {
     // this will emit the event to all connected sockets
     io.emit("data", "ADMIN " + consoleinput);
     console.log(
-      new Date().getHours() + ":" +
-        new Date().getMinutes() +":" +
-        new Date().getSeconds() +":" +
+      new Date().getHours() +
+        ":" +
+        new Date().getMinutes() +
+        ":" +
+        new Date().getSeconds() +
+        ":" +
         new Date().getMilliseconds() +
         '> wrote "' +
         consoleinput +

@@ -13,6 +13,7 @@
 <script defer>
   socket.on('data', (data) => {
     datasplit = data.split(" ");
+    console.log(datasplit)
     if (datasplit[2].toUpperCase () !== datasplit[2].toLowerCase()) //isalphabetic??
     {
       datasplit[2] = datasplit[2].toLowerCase().charCodeAt(0) - 96;
@@ -34,7 +35,7 @@
       }
     }
     else {
-      console.error("SocketData error: \"" + data + "\"\nis has:" + datasplit.length + " separate elements, 4 expected\n" + "\"element [1] isNaN value:" + isNaN(+datasplit[1]) + " separate elements, false expected\n" + "\"element [2] isNaN value:" + isNaN(+datasplit[2]) + " separate elements, false expected\n")
+      console.error("SocketData error: \"" + data + "\"\nhas:" + datasplit.length + " separate elements, 4 expected\n" + "\"element [1] isNaN value:" + isNaN(+datasplit[1]) + " separate elements, false expected\n" + "\"element [2] isNaN value:" + isNaN(+datasplit[2]) + " separate elements, false expected\n")
     }
   });
 </script> <!--  defer -->
